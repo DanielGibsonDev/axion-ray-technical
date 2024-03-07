@@ -1,10 +1,10 @@
-import MainForm from '../../components/MainForm/MainForm'
+import SearchForm from '../../components/SearchForm/SearchForm'
 
 const MainPage = () => {
   return (
     <div>
       <div>MainPage</div>
-      <MainForm />
+      <SearchForm />
     </div>
   )
 }
