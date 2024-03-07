@@ -1,13 +1,10 @@
 import React from 'react'
-import logo from './logo.svg'
-import './App.css'
+import MainPage from './pages/MainPage/MainPage'
 
 const App = () => {
   return (
     <div>
-      <header>
-        <p>Hello world</p>
-      </header>
+      <MainPage />
     </div>
   )
 }
