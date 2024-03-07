@@ -1,3 +1,16 @@
+# Axion Ray Technical take-home test - React App
+
+- My Application and technical choices
+- Steps to run the app
+- Steps to deploy the app
+- Ideas for new features
+
+## 3rd party library choices
+
+- TailwindCSS for quick and easy CSS styling
+- Prettier for unified code formatting with ESLint
+- Husky for pre-commit Prettier check
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
