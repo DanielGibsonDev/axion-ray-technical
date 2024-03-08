@@ -10,6 +10,12 @@
 - TailwindCSS for quick and easy CSS styling
 - Prettier for unified code formatting with ESLint
 - Husky for pre-commit Prettier check
+- Formik for easier handling of forms, helps greatly with
+  - Getting values in and out of a form state
+  - Validation and error messages
+  - Handling form submissions
+- Yup form validations for ease of use
+  - Far more easier to apply and create a unified schema of input validations
 
 # Getting Started with Create React App
 
