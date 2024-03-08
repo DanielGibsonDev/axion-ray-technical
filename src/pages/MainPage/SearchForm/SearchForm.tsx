@@ -1,8 +1,13 @@
 import { useFormik } from 'formik'
+import { useState } from 'react'
 import * as Yup from 'yup'
 
 interface FormValues {
   searchTerm: string
+}
+
+interface SearchFormProps {
+  onSubmit: (values: FormValues) => Promise<void>
 }
 
 const SearchFormSchema = Yup.object().shape({
@@ -12,17 +17,15 @@ const SearchFormSchema = Yup.object().shape({
     .required('Required'),
 })
 
-export const SearchForm: React.FC = () => {
+export const SearchForm = ({ onSubmit }: SearchFormProps) => {
   const initialValues: FormValues = { searchTerm: '' }
 
   const { handleSubmit, handleChange, values, errors } = useFormik({
-    initialValues: initialValues,
+    initialValues,
     validationSchema: SearchFormSchema,
     validateOnChange: false,
     validateOnBlur: false,
-    onSubmit: (values) => {
-      console.log(values)
-    },
+    onSubmit,
   })
 
   return (
