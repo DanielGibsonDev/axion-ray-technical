@@ -4,7 +4,7 @@ interface FormData {
   searchTerm: string
 }
 
-const SearchForm = () => {
+export const SearchForm: React.FC = () => {
   const [formData, setFormData] = useState<FormData>({
     searchTerm: '',
   })
@@ -35,5 +35,3 @@ const SearchForm = () => {
     </form>
   )
 }
-
-export default SearchForm

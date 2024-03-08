@@ -1,6 +1,6 @@
-import SearchForm from '../../components/SearchForm/SearchForm'
+import { SearchForm } from './SearchForm/SearchForm'
 
-const MainPage = () => {
+export const MainPage: React.FC = () => {
   return (
     <div>
       <div>MainPage</div>
@@ -8,5 +8,3 @@ const MainPage = () => {
     </div>
   )
 }
-
-export default MainPage

@@ -1,12 +1,10 @@
 import React from 'react'
-import MainPage from './pages/MainPage/MainPage'
+import { MainPage } from './pages/MainPage/MainPage'
 
-const App = () => {
+export const App: React.FC = () => {
   return (
     <div>
       <MainPage />
     </div>
   )
 }
-
-export default App
