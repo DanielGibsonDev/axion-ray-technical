@@ -7,7 +7,7 @@ interface FormValues {
 }
 
 interface SearchFormProps {
-  onSubmit: (values: FormValues) => Promise<void>
+  onSubmit: (searchTerm: string) => Promise<void>
 }
 
 const SearchFormSchema = Yup.object().shape({
@@ -25,7 +25,9 @@ export const SearchForm = ({ onSubmit }: SearchFormProps) => {
     validationSchema: SearchFormSchema,
     validateOnChange: false,
     validateOnBlur: false,
-    onSubmit,
+    onSubmit: (values) => {
+      onSubmit(values.searchTerm)
+    },
   })
 
   return (

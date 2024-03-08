@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { SearchForm } from './SearchForm/SearchForm'
+import { RepoTable } from './RepoTable/RepoTable'
 
-interface GitHubRepo {
+export interface GitHubRepo {
   id: number
   name: string
   description: string
@@ -11,23 +12,28 @@ interface GitHubRepo {
 
 export const MainPage: React.FC = () => {
   const [isFetching, setIsFetching] = useState<boolean>(false)
-  const [errors, setErrors] = useState<string | null>()
-  const [repos, setRepos] = useState<GitHubRepo[]>()
+  const [errors, setErrors] = useState<string | null>(null)
+  const [repos, setRepos] = useState<GitHubRepo[] | null>(null)
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (usernameOrOrgName: string) => {
     try {
+      setErrors(null)
       setIsFetching(true)
       const response = await fetch(
-        'https://api.github.com/users/danielgibsondev/repos'
+        `https://api.github.com/users/${usernameOrOrgName}/repos`
       )
 
       if (!response.ok) {
-        setErrors(`HTTP error! Status: ${response.status}`)
-        throw new Error(`HTTP error! Status: ${response.status}`)
+        if (response.status === 404) {
+          setErrors('Username or Organisation not found')
+        } else {
+          setErrors(`HTTP error! Status: ${response.status}`)
+          throw new Error(`HTTP error! Status: ${response.status}`)
+        }
       }
 
       const data = await response.json()
-      setRepos(data)
+      setRepos(data as GitHubRepo[])
     } catch (error: any) {
       console.error('Error fetching data: ', error)
       setErrors(`Error: ${error.message}`)
@@ -42,12 +48,9 @@ export const MainPage: React.FC = () => {
         List GitHub Public Repositories from a username or organisation name
       </h1>
       <SearchForm onSubmit={handleSubmit} />
-      {isFetching ? (
-        <div className="mt-2 text-xl">Fetching Repositories...</div>
-      ) : null}
-      {errors ? (
-        <div className="mt-2 text-xl text-red-600">{errors}</div>
-      ) : null}
+      {isFetching ? <div className="mt-2">Fetching Repositories...</div> : null}
+      {errors ? <div className="mt-2 text-red-600">{errors}</div> : null}
+      {!isFetching && !errors ? <RepoTable repos={repos} /> : null}
     </div>
   )
 }
