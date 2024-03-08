@@ -6,7 +6,7 @@ export interface GitHubRepo {
   id: number
   name: string
   description: string
-  url: string
+  html_url: string
   updated_at: string
 }
 
@@ -14,13 +14,15 @@ export const MainPage: React.FC = () => {
   const [isFetching, setIsFetching] = useState<boolean>(false)
   const [errors, setErrors] = useState<string | null>(null)
   const [repos, setRepos] = useState<GitHubRepo[] | null>(null)
+  const [repoUsername, setRepoUsername] = useState<string | null>(null)
 
-  const handleSubmit = async (usernameOrOrgName: string) => {
+  const handleSubmit = async (username: string) => {
     try {
+      setRepoUsername(username)
       setErrors(null)
       setIsFetching(true)
       const response = await fetch(
-        `https://api.github.com/users/${usernameOrOrgName}/repos`
+        `https://api.github.com/users/${username}/repos`
       )
 
       if (!response.ok) {
@@ -50,7 +52,9 @@ export const MainPage: React.FC = () => {
       <SearchForm onSubmit={handleSubmit} />
       {isFetching ? <div className="mt-2">Fetching Repositories...</div> : null}
       {errors ? <div className="mt-2 text-red-600">{errors}</div> : null}
-      {!isFetching && !errors ? <RepoTable repos={repos} /> : null}
+      {!isFetching && !errors ? (
+        <RepoTable username={repoUsername} repos={repos} />
+      ) : null}
     </div>
   )
 }

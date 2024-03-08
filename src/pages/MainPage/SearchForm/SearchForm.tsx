@@ -25,8 +25,9 @@ export const SearchForm = ({ onSubmit }: SearchFormProps) => {
     validationSchema: SearchFormSchema,
     validateOnChange: false,
     validateOnBlur: false,
-    onSubmit: (values) => {
-      onSubmit(values.searchTerm)
+    onSubmit: (values, { resetForm }) => {
+      onSubmit(values.searchTerm.trim())
+      resetForm()
     },
   })
 
