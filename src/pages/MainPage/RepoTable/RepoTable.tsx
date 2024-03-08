@@ -43,13 +43,30 @@ export const RepoTable = ({ username, repos }: RepoTablesProps) => {
                   >
                     {repo.html_url}
                   </a>
-                ) : null}
+                ) : (
+                  'No URL available'
+                )}
               </td>
-              <td>{repo.updated_at}</td>
+              <td>
+                {repo.updated_at
+                  ? new Intl.DateTimeFormat('en-GB').format(
+                      new Date(repo.updated_at)
+                    )
+                  : 'No update date available'}
+              </td>
             </tr>
           ))}
         </tbody>
       </table>
+
+      <div className="flex justify-center gap-6 my-6">
+        <button className="mt-2 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 focus:outline-none">
+          Previous
+        </button>
+        <button className="mt-2 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 focus:outline-none">
+          Next
+        </button>
+      </div>
     </div>
   )
 }
