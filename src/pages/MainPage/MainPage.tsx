@@ -60,6 +60,17 @@ export const MainPage: React.FC = () => {
   const [filterOptions, setFilterOptions] = useState<FilterOptions>('owner')
 
   useEffect(() => {
+    setPagination({
+      currentPage: '1',
+    })
+    setSortingOptions({
+      sortBy: 'full_name',
+      direction: 'asc',
+    })
+    setFilterOptions('owner')
+  }, [repoUsername])
+
+  useEffect(() => {
     if (repoUsername) {
       const handleFetch = async () => {
         try {
