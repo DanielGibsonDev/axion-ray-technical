@@ -1,17 +1,46 @@
-import { GitHubRepo } from '../MainPage'
+import { GitHubRepo, Pagination } from '../MainPage'
 
 interface RepoTablesProps {
   username: string | null
   repos: GitHubRepo[] | null
+  pagination: Pagination | null
+  onPaginationClick: (username: string, newPage: string) => Promise<void>
 }
 
-export const RepoTable = ({ username, repos }: RepoTablesProps) => {
-  if (repos === null) {
+export const RepoTable = ({
+  username,
+  repos,
+  pagination,
+  onPaginationClick,
+}: RepoTablesProps) => {
+  if (repos === null || username === null) {
     return null
   }
 
   if (repos.length === 0) {
     return <div>No public repos</div>
+  }
+
+  const handlePrev = () => {
+    const newPage = pagination?.prev?.page
+    if (newPage) {
+      onPaginationClick(username, newPage)
+    } else {
+      console.error(
+        'Pagination previous button clicked with no new page value found'
+      )
+    }
+  }
+
+  const handleNext = () => {
+    const newPage = pagination?.next?.page
+    if (newPage) {
+      onPaginationClick(username, newPage)
+    } else {
+      console.error(
+        'Pagination previous button clicked with no new page value found'
+      )
+    }
   }
 
   return (
@@ -22,7 +51,7 @@ export const RepoTable = ({ username, repos }: RepoTablesProps) => {
       <table className="table-auto text-left">
         <thead>
           <tr className="border-b">
-            <th>Name</th>
+            <th>Full Name</th>
             <th>Description</th>
             <th>URL</th>
             <th>Last Updated</th>
@@ -31,7 +60,7 @@ export const RepoTable = ({ username, repos }: RepoTablesProps) => {
         <tbody>
           {repos.map((repo) => (
             <tr className="border-b" key={repo.id}>
-              <td>{repo.name}</td>
+              <td>{repo.full_name}</td>
               <td>{repo.description}</td>
               <td>
                 {repo.html_url ? (
@@ -59,11 +88,25 @@ export const RepoTable = ({ username, repos }: RepoTablesProps) => {
         </tbody>
       </table>
 
-      <div className="flex justify-center gap-6 my-6">
-        <button className="mt-2 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 focus:outline-none">
+      <div className="text-center mt-6">
+        <span>
+          {`Page ${pagination?.currentPage ?? '1'}
+          of ${pagination?.last?.page ?? pagination?.currentPage ?? 1}`}
+        </span>
+      </div>
+      <div className="flex justify-center gap-6 my-4">
+        <button
+          disabled={!pagination?.prev}
+          onClick={handlePrev}
+          className={`mt-2 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 focus:outline-none ${!pagination?.prev ? 'opacity-50 cursor-not-allowed' : ''}`}
+        >
           Previous
         </button>
-        <button className="mt-2 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 focus:outline-none">
+        <button
+          disabled={!pagination?.next?.page}
+          onClick={handleNext}
+          className={`mt-2 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 focus:outline-none ${!pagination?.next ? 'opacity-50 cursor-not-allowed' : ''}`}
+        >
           Next
         </button>
       </div>
