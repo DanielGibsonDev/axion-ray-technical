@@ -3,8 +3,8 @@ import { GitHubRepo, Pagination } from '../MainPage'
 interface RepoTablesProps {
   username: string | null
   repos: GitHubRepo[] | null
-  pagination: Pagination | null
-  onPaginationClick: (newPage: string) => Promise<void>
+  pagination: Pagination
+  onPaginationClick: (newPage: string) => void
 }
 
 export const RepoTable = ({
@@ -26,7 +26,7 @@ export const RepoTable = ({
   }
 
   const handlePaginationClick = (direction: 'next' | 'prev') => {
-    const newPage = pagination?.[direction]?.page
+    const newPage = pagination[direction]?.page
     if (newPage) {
       onPaginationClick(newPage)
     } else {
@@ -82,22 +82,26 @@ export const RepoTable = ({
 
       <div className="text-center mt-6">
         <span>
-          {`Page ${pagination?.currentPage ?? '1'}
-          of ${pagination?.last?.page ?? pagination?.currentPage ?? 1}`}
+          {`Page ${pagination.currentPage ?? '1'}
+          of ${pagination.last?.page ?? pagination.currentPage ?? 1}`}
         </span>
       </div>
       <div className="flex justify-center gap-6 my-4">
         <button
-          disabled={!pagination?.prev}
+          disabled={
+            !pagination.prev || pagination.prev?.page === pagination.currentPage
+          }
           onClick={() => handlePaginationClick('prev')}
-          className={`mt-2 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 focus:outline-none ${!pagination?.prev ? 'opacity-50 cursor-not-allowed' : ''}`}
+          className={`mt-2 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 focus:outline-none ${!pagination.prev || pagination.prev?.page === pagination.currentPage ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
           Previous
         </button>
         <button
-          disabled={!pagination?.next?.page}
+          disabled={
+            !pagination.next || pagination.next?.page === pagination.currentPage
+          }
           onClick={() => handlePaginationClick('next')}
-          className={`mt-2 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 focus:outline-none ${!pagination?.next ? 'opacity-50 cursor-not-allowed' : ''}`}
+          className={`mt-2 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 focus:outline-none ${!pagination.next || pagination.next?.page === pagination.currentPage ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
           Next
         </button>

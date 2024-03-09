@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { SearchForm } from './SearchForm/SearchForm'
 import { RepoTable } from './RepoTable/RepoTable'
 import parseLinkHeader from 'parse-link-header'
@@ -50,68 +50,77 @@ export const MainPage: React.FC = () => {
   const [errors, setErrors] = useState<string | null>(null)
   const [repos, setRepos] = useState<GitHubRepo[] | null>(null)
   const [repoUsername, setRepoUsername] = useState<string | null>(null)
-  const [pagination, setPagination] = useState<Pagination | null>(null)
+  const [pagination, setPagination] = useState<Pagination>({
+    currentPage: '1',
+  })
   const [sortingOptions, setSortingOptions] = useState<SortingOptions>({
     sortBy: 'full_name',
     direction: 'asc',
   })
   const [filterOptions, setFilterOptions] = useState<FilterOptions>('owner')
 
-  const handleFetch = async (page: string = '1') => {
-    try {
-      setErrors(null)
-      setIsFetching(true)
+  useEffect(() => {
+    if (repoUsername) {
+      const handleFetch = async () => {
+        try {
+          setErrors(null)
+          setIsFetching(true)
 
-      const response = await fetch(
-        `https://api.github.com/users/${repoUsername}/repos?page=${page}&sort=${sortingOptions.sortBy}&direction=${sortingOptions.direction}&type=${filterOptions}`
-      )
+          const response = await fetch(
+            `https://api.github.com/users/${repoUsername}/repos?page=${pagination.currentPage}&sort=${sortingOptions.sortBy}&direction=${sortingOptions.direction}&type=${filterOptions}`
+          )
 
-      if (!response.ok) {
-        if (response.status === 404) {
-          setErrors('Username or Organisation not found')
-        } else {
-          setErrors(
-            `HTTP error! Status: ${response.status} - This may be due to rate limiting, please try again later`
-          )
-          throw new Error(
-            `HTTP error! Status: ${response.status} - This may be due to rate limiting, please try again later`
-          )
+          if (!response.ok) {
+            if (response.status === 404) {
+              setErrors('Username or Organisation not found')
+            } else {
+              setErrors(
+                `HTTP error! Status: ${response.status} - This may be due to rate limiting, please try again later`
+              )
+              throw new Error(
+                `HTTP error! Status: ${response.status} - This may be due to rate limiting, please try again later`
+              )
+            }
+          }
+
+          if (response.headers.has('link')) {
+            const links = parseLinkHeader(response.headers.get('link'))
+            setPagination((prevValues) => ({ ...prevValues, ...links }))
+          }
+
+          const data = await response.json()
+          setRepos(data as GitHubRepo[])
+        } catch (error: any) {
+          console.error('Error fetching data: ', error)
+          setErrors(`Error: ${error.message}`)
+        } finally {
+          setIsFetching(false)
         }
       }
-
-      if (response.headers.has('link')) {
-        const links = parseLinkHeader(response.headers.get('link'))
-        setPagination({ ...links, currentPage: page })
-      }
-
-      const data = await response.json()
-      setRepos(data as GitHubRepo[])
-    } catch (error: any) {
-      console.error('Error fetching data: ', error)
-      setErrors(`Error: ${error.message}`)
-    } finally {
-      setIsFetching(false)
+      handleFetch()
     }
-  }
+  }, [
+    repoUsername,
+    pagination.currentPage,
+    sortingOptions.direction,
+    sortingOptions.sortBy,
+    filterOptions,
+  ])
 
-  const handleFormSubmit = (username: string) => {
-    setRepoUsername(username)
-    handleFetch()
+  const handlePaginationChange = (newPage: string) => {
+    setPagination((prevValues) => ({ ...prevValues, currentPage: newPage }))
   }
 
   const handleSortingClick = (sortBy: SortBy) => {
     setSortingOptions((values) => ({ ...values, sortBy }))
-    handleFetch()
   }
 
   const handleSortingDirectionClick = (direction: Direction) => {
     setSortingOptions((values) => ({ ...values, direction }))
-    handleFetch()
   }
 
   const handleFilteringClick = (type: FilterOptions) => {
     setFilterOptions(type)
-    handleFetch()
   }
 
   return (
@@ -119,7 +128,7 @@ export const MainPage: React.FC = () => {
       <h1 className="my-8 max-w-3xl text-center text-3xl font-extrabold leading-none tracking-tight text-gray-900">
         List GitHub Public Repositories from a username or organisation name
       </h1>
-      <SearchForm onSubmit={handleFormSubmit} />
+      <SearchForm onSubmit={setRepoUsername} />
       {repos ? (
         <div>
           <div className="flex flex-col items-center">
@@ -208,7 +217,7 @@ export const MainPage: React.FC = () => {
           username={repoUsername}
           repos={repos}
           pagination={pagination}
-          onPaginationClick={handleFetch}
+          onPaginationClick={handlePaginationChange}
         />
       ) : null}
     </div>
