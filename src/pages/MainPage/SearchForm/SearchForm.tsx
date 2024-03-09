@@ -12,7 +12,7 @@ interface SearchFormProps {
 const SearchFormSchema = Yup.object().shape({
   searchTerm: Yup.string()
     .min(1, 'Too short!')
-    .max(100, 'Too long!')
+    .max(39, 'Too long!')
     .required('Required'),
 })
 

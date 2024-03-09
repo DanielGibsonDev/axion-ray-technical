@@ -15,23 +15,23 @@ export interface GitHubRepo {
 export interface Pagination {
   first?: {
     page: string
-    rel: string
-    url: string
+    rel?: string
+    url?: string
   }
   last?: {
     page: string
-    rel: string
-    url: string
+    rel?: string
+    url?: string
   }
   next?: {
     page: string
-    rel: string
-    url: string
+    rel?: string
+    url?: string
   }
   prev?: {
     page: string
-    rel: string
-    url: string
+    rel?: string
+    url?: string
   }
   currentPage: string
 }
