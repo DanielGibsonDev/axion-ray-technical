@@ -7,8 +7,9 @@ export interface GitHubRepo {
   id: number
   full_name: string
   description: string
-  html_url: string
+  created_at: string
   updated_at: string
+  pushed_at: string
 }
 
 export interface Pagination {
@@ -35,29 +36,46 @@ export interface Pagination {
   currentPage: string
 }
 
+type SortBy = 'full_name' | 'created' | 'updated' | 'pushed'
+type Direction = 'asc' | 'desc'
+type FilterOptions = 'all' | 'owner' | 'member'
+
+interface SortingOptions {
+  sortBy: SortBy
+  direction: Direction
+}
+
 export const MainPage: React.FC = () => {
   const [isFetching, setIsFetching] = useState<boolean>(false)
   const [errors, setErrors] = useState<string | null>(null)
   const [repos, setRepos] = useState<GitHubRepo[] | null>(null)
   const [repoUsername, setRepoUsername] = useState<string | null>(null)
   const [pagination, setPagination] = useState<Pagination | null>(null)
+  const [sortingOptions, setSortingOptions] = useState<SortingOptions>({
+    sortBy: 'full_name',
+    direction: 'asc',
+  })
+  const [filterOptions, setFilterOptions] = useState<FilterOptions>('owner')
 
-  const handleFetch = async (username: string, page: string = '1') => {
+  const handleFetch = async (page: string = '1') => {
     try {
-      setRepoUsername(username)
       setErrors(null)
       setIsFetching(true)
 
       const response = await fetch(
-        `https://api.github.com/users/${username}/repos?page=${page}`
+        `https://api.github.com/users/${repoUsername}/repos?page=${page}&sort=${sortingOptions.sortBy}&direction=${sortingOptions.direction}&type=${filterOptions}`
       )
 
       if (!response.ok) {
         if (response.status === 404) {
           setErrors('Username or Organisation not found')
         } else {
-          setErrors(`HTTP error! Status: ${response.status}`)
-          throw new Error(`HTTP error! Status: ${response.status}`)
+          setErrors(
+            `HTTP error! Status: ${response.status} - This may be due to rate limiting, please try again later`
+          )
+          throw new Error(
+            `HTTP error! Status: ${response.status} - This may be due to rate limiting, please try again later`
+          )
         }
       }
 
@@ -76,12 +94,113 @@ export const MainPage: React.FC = () => {
     }
   }
 
+  const handleFormSubmit = (username: string) => {
+    setRepoUsername(username)
+    handleFetch()
+  }
+
+  const handleSortingClick = (sortBy: SortBy) => {
+    setSortingOptions((values) => ({ ...values, sortBy }))
+    handleFetch()
+  }
+
+  const handleSortingDirectionClick = (direction: Direction) => {
+    setSortingOptions((values) => ({ ...values, direction }))
+    handleFetch()
+  }
+
+  const handleFilteringClick = (type: FilterOptions) => {
+    setFilterOptions(type)
+    handleFetch()
+  }
+
   return (
     <div className="flex flex-col items-center">
       <h1 className="my-8 max-w-3xl text-center text-3xl font-extrabold leading-none tracking-tight text-gray-900">
         List GitHub Public Repositories from a username or organisation name
       </h1>
-      <SearchForm onSubmit={handleFetch} />
+      <SearchForm onSubmit={handleFormSubmit} />
+      {repos ? (
+        <div>
+          <div className="flex flex-col items-center">
+            <h3 className="mt-8 mb-2 max-w-3xl text-center text-xl font-extrabold leading-none tracking-tight text-gray-900">
+              Sorting options
+            </h3>
+            <div>
+              <button
+                className="mt-2 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 focus:outline-none"
+                onClick={() => handleSortingClick('full_name')}
+              >
+                Full Name
+              </button>
+              <button
+                className="mt-2 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 focus:outline-none"
+                onClick={() => handleSortingClick('created')}
+              >
+                Last Created
+              </button>
+              <button
+                className="mt-2 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 focus:outline-none"
+                onClick={() => handleSortingClick('updated')}
+              >
+                Last Updated
+              </button>
+              <button
+                className="mt-2 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 focus:outline-none"
+                onClick={() => handleSortingClick('pushed')}
+              >
+                Last Pushed
+              </button>
+            </div>
+          </div>
+
+          <div className="flex flex-col items-center">
+            <h3 className="mt-8 mb-2 max-w-3xl text-center text-xl font-extrabold leading-none tracking-tight text-gray-900">
+              Sorting direction
+            </h3>
+            <div>
+              <button
+                className="mt-2 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 focus:outline-none"
+                onClick={() => handleSortingDirectionClick('asc')}
+              >
+                Ascending
+              </button>
+              <button
+                className="mt-2 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 focus:outline-none"
+                onClick={() => handleSortingDirectionClick('desc')}
+              >
+                Descending
+              </button>
+            </div>
+          </div>
+
+          <div className="flex flex-col items-center">
+            <h3 className="mt-8 mb-2 max-w-3xl text-center text-xl font-extrabold leading-none tracking-tight text-gray-900">
+              Filter by type
+            </h3>
+            <div>
+              <button
+                className="mt-2 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 focus:outline-none"
+                onClick={() => handleFilteringClick('all')}
+              >
+                All
+              </button>
+              <button
+                className="mt-2 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 focus:outline-none"
+                onClick={() => handleFilteringClick('owner')}
+              >
+                Owner
+              </button>
+              <button
+                className="mt-2 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 focus:outline-none"
+                onClick={() => handleFilteringClick('member')}
+              >
+                Member
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
       {isFetching ? <div className="mt-2">Fetching Repositories...</div> : null}
       {errors ? <div className="mt-2 text-red-600">{errors}</div> : null}
       {!isFetching && !errors ? (

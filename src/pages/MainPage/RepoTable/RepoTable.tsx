@@ -4,7 +4,7 @@ interface RepoTablesProps {
   username: string | null
   repos: GitHubRepo[] | null
   pagination: Pagination | null
-  onPaginationClick: (username: string, newPage: string) => Promise<void>
+  onPaginationClick: (newPage: string) => Promise<void>
 }
 
 export const RepoTable = ({
@@ -13,33 +13,24 @@ export const RepoTable = ({
   pagination,
   onPaginationClick,
 }: RepoTablesProps) => {
-  if (repos === null || username === null) {
+  if (repos === null) {
     return null
   }
 
   if (repos.length === 0) {
-    return <div>No public repos</div>
+    return (
+      <div className="mt-10">
+        No public repos or matching results to selected filter
+      </div>
+    )
   }
 
-  const handlePrev = () => {
-    const newPage = pagination?.prev?.page
+  const handlePaginationClick = (direction: 'next' | 'prev') => {
+    const newPage = pagination?.[direction]?.page
     if (newPage) {
-      onPaginationClick(username, newPage)
+      onPaginationClick(newPage)
     } else {
-      console.error(
-        'Pagination previous button clicked with no new page value found'
-      )
-    }
-  }
-
-  const handleNext = () => {
-    const newPage = pagination?.next?.page
-    if (newPage) {
-      onPaginationClick(username, newPage)
-    } else {
-      console.error(
-        'Pagination previous button clicked with no new page value found'
-      )
+      console.error('Pagination button clicked with no new page value found')
     }
   }
 
@@ -52,9 +43,10 @@ export const RepoTable = ({
         <thead>
           <tr className="border-b">
             <th>Full Name</th>
-            <th>Description</th>
-            <th>URL</th>
-            <th>Last Updated</th>
+            <th>description</th>
+            <th>Created</th>
+            <th>Updated</th>
+            <th>Pushed</th>
           </tr>
         </thead>
         <tbody>
@@ -63,18 +55,11 @@ export const RepoTable = ({
               <td>{repo.full_name}</td>
               <td>{repo.description}</td>
               <td>
-                {repo.html_url ? (
-                  <a
-                    className="text-blue-500"
-                    target="_blank"
-                    rel="noreferrer"
-                    href={repo.html_url}
-                  >
-                    {repo.html_url}
-                  </a>
-                ) : (
-                  'No URL available'
-                )}
+                {repo.created_at
+                  ? new Intl.DateTimeFormat('en-GB').format(
+                      new Date(repo.created_at)
+                    )
+                  : 'No created date available'}
               </td>
               <td>
                 {repo.updated_at
@@ -82,6 +67,13 @@ export const RepoTable = ({
                       new Date(repo.updated_at)
                     )
                   : 'No update date available'}
+              </td>
+              <td>
+                {repo.pushed_at
+                  ? new Intl.DateTimeFormat('en-GB').format(
+                      new Date(repo.pushed_at)
+                    )
+                  : 'No pushed date available'}
               </td>
             </tr>
           ))}
@@ -97,14 +89,14 @@ export const RepoTable = ({
       <div className="flex justify-center gap-6 my-4">
         <button
           disabled={!pagination?.prev}
-          onClick={handlePrev}
+          onClick={() => handlePaginationClick('prev')}
           className={`mt-2 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 focus:outline-none ${!pagination?.prev ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
           Previous
         </button>
         <button
           disabled={!pagination?.next?.page}
-          onClick={handleNext}
+          onClick={() => handlePaginationClick('next')}
           className={`mt-2 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 focus:outline-none ${!pagination?.next ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
           Next
