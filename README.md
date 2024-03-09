@@ -16,6 +16,7 @@
   - Handling form submissions
 - Yup form validations for ease of use
   - Far more easier to apply and create a unified schema of input validations
+- Parse-link-header, Querystring, url - all used for parsing the Link response header from GitHub API for pagination information
 
 ## Instructions for running the app locally
 
